@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,7 +11,6 @@ void main() {
     DeviceOrientation.landscapeRight,
   ]);
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-
   runApp(const Esp32DashApp());
 }
 
@@ -149,7 +147,8 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> with TickerProviderStateMixin {
+class _DashboardScreenState extends State<DashboardScreen>
+    with TickerProviderStateMixin {
   DashboardData _data = DashboardData();
   bool _isSimulating = true;
   Timer? _simTimer;
@@ -159,7 +158,6 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
 
   // Status USB
   String _usbStatus = "Disconnected (Demomode)";
-  final List<String> _rawLogs = [];
 
   @override
   void initState() {
@@ -185,18 +183,14 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
     _simTimer?.cancel();
     _simTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
       if (!_isSimulating) return;
-
       _simTime += 0.1;
       double rpmTarget = 4000.0 + 3500.0 * (1.0 + math.sin(_simTime * 0.8));
       double newRpm = _data.rpm + (rpmTarget - _data.rpm) * 0.2;
-
       int gear = _data.gear;
       if (newRpm > 9500 && gear < 6) gear++;
       if (newRpm < 3500 && gear > 1) gear--;
-
       double ratio = [0, 15, 22, 28, 34, 40, 46][gear].toDouble();
       double newSpeed = (newRpm / 1000.0) * ratio;
-
       setState(() {
         _data = _data.copyWith(
           rpm: newRpm.toInt().clamp(0, 12000),
@@ -239,7 +233,6 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
               // 1. TOP HEADER BAR
               _buildTopHeaderBar(),
               const SizedBox(height: 6),
-
               // 2. MAIN 3-PANEL LANDSCAPE DISPLAY
               Expanded(
                 child: Row(
@@ -252,14 +245,12 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                       ),
                     ),
                     const SizedBox(width: 8),
-
                     // CENTER PANEL: RPM Arc & Speedometer
                     Expanded(
                       flex: 44,
                       child: _buildCenterGaugePanel(),
                     ),
                     const SizedBox(width: 8),
-
                     // RIGHT PANEL: Fuel Bar & Odo
                     Expanded(
                       flex: 28,
@@ -270,7 +261,6 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                   ],
                 ),
               ),
-
               // 3. BOTTOM DECORATIVE PILL
               Container(
                 margin: const EdgeInsets.only(top: 4),
@@ -349,7 +339,6 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
               ],
             ),
           ),
-
           // Volt & Temp
           Row(
             children: [
@@ -368,20 +357,24 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
               ),
             ],
           ),
-
           // Digital Clock
           StreamBuilder(
             stream: Stream.periodic(const Duration(seconds: 1)),
             builder: (context, snapshot) {
               final now = DateTime.now();
-              final timeStr = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
+              final timeStr =
+                  "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
               return Text(
                 timeStr,
-                style: const TextStyle(color: Colors.slate300, fontWeight: FontWeight.bold, fontSize: 14, fontFamily: 'Monospace'),
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontFamily: 'Monospace',
+                ),
               );
             },
           ),
-
           // Fuel % & Odo
           Row(
             children: [
@@ -394,11 +387,10 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
               const SizedBox(width: 14),
               Text(
                 "ODO: ${_data.odo.toInt()} km",
-                style: const TextStyle(color: Colors.slate400, fontWeight: FontWeight.bold, fontSize: 12),
+                style: const TextStyle(color: Colors.white54, fontWeight: FontWeight.bold, fontSize: 12),
               ),
             ],
           ),
-
           // Settings Trigger
           GestureDetector(
             onTap: _showSettingsDialog,
@@ -408,7 +400,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                 color: Colors.white.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(Icons.settings, size: 16, color: Colors.slate300),
+              child: const Icon(Icons.settings, size: 16, color: Colors.white70),
             ),
           ),
         ],
@@ -444,14 +436,16 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
             width: 20,
             height: 20,
             decoration: BoxDecoration(
-              color: (_data.neutral || _data.gear == 0) ? const Color(0xFF22C55E) : const Color(0xFF1E293B),
+              color: (_data.neutral || _data.gear == 0)
+                  ? const Color(0xFF22C55E)
+                  : const Color(0xFF1E293B),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 "N",
                 style: TextStyle(
-                  color: (_data.neutral || _data.gear == 0) ? Colors.black : Colors.slate500,
+                  color: (_data.neutral || _data.gear == 0) ? Colors.black : Colors.white38,
                   fontWeight: FontWeight.black,
                   fontSize: 11,
                 ),
@@ -479,7 +473,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                   child: Text(
                     "ABS",
                     style: TextStyle(
-                      color: _data.abs ? const Color(0xFFFACC15) : Colors.slate600,
+                      color: _data.abs ? const Color(0xFFFACC15) : Colors.white38,
                       fontWeight: FontWeight.black,
                       fontSize: 11,
                     ),
@@ -501,7 +495,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                 child: Icon(
                   Icons.oil_barrel,
                   size: 18,
-                  color: _data.oil ? const Color(0xFFEF4444) : Colors.slate700,
+                  color: _data.oil ? const Color(0xFFEF4444) : Colors.white38,
                 ),
               ),
             ),
@@ -546,7 +540,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
           Text(
             label,
             style: TextStyle(
-              color: isActive ? activeColor : Colors.slate600,
+              color: isActive ? activeColor : Colors.white38,
               fontSize: 10,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.0,
@@ -569,13 +563,15 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
           size: Size.infinite,
           painter: RpmGaugePainter(rpm: _data.rpm),
         ),
-
         // Gear & Speed Display
         Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 10),
-            const Text("GEAR", style: TextStyle(color: Colors.slate400, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2)),
+            const Text(
+              "GEAR",
+              style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2),
+            ),
             Text(
               _data.gear == 0 || _data.neutral ? "N" : "${_data.gear}",
               style: const TextStyle(color: Color(0xFF22D3EE), fontSize: 38, fontWeight: FontWeight.black, height: 1.0),
@@ -590,12 +586,14 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                   style: const TextStyle(color: Colors.white, fontSize: 62, fontWeight: FontWeight.black, fontStyle: FontStyle.italic, height: 1.0),
                 ),
                 const SizedBox(width: 4),
-                const Text("km/h", style: TextStyle(color: Colors.slate400, fontSize: 14, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic)),
+                const Text(
+                  "km/h",
+                  style: TextStyle(color: Colors.white54, fontSize: 14, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic),
+                ),
               ],
             ),
           ],
         ),
-
         // Bottom Riding Modes Bar
         Positioned(
           bottom: 8,
@@ -622,7 +620,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                     child: Text(
                       mode,
                       style: TextStyle(
-                        color: isSelected ? const Color(0xFF22D3EE) : Colors.slate600,
+                        color: isSelected ? const Color(0xFF22D3EE) : Colors.white38,
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                       ),
@@ -658,7 +656,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
               Text(
                 "RIGHT TURN",
                 style: TextStyle(
-                  color: _data.right ? const Color(0xFF22C55E) : Colors.slate600,
+                  color: _data.right ? const Color(0xFF22C55E) : Colors.white38,
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.0,
@@ -677,7 +675,6 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
             ],
           ),
         ),
-
         // Vertical Segmented Fuel Gauge
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
@@ -685,7 +682,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
             Column(
               crossAxisAlignment: CrossAlignment.end,
               children: [
-                const Text("FUEL LEVEL", style: TextStyle(color: Colors.slate400, fontSize: 9, fontWeight: FontWeight.bold)),
+                const Text("FUEL LEVEL", style: TextStyle(color: Colors.white54, fontSize: 9, fontWeight: FontWeight.bold)),
                 Text(
                   "${_data.fuel.toInt()}%",
                   style: const TextStyle(color: Color(0xFF22D3EE), fontSize: 16, fontWeight: FontWeight.bold),
@@ -732,7 +729,6 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
             ),
           ],
         ),
-
         // Trip & Odo Summary
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -746,7 +742,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("TRIP", style: TextStyle(color: Colors.slate400, fontSize: 10, fontWeight: FontWeight.bold)),
+                  const Text("TRIP", style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold)),
                   Text("${_data.trip.toStringAsFixed(1)} km", style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
                 ],
               ),
@@ -754,7 +750,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("ODO", style: TextStyle(color: Colors.slate400, fontSize: 10, fontWeight: FontWeight.bold)),
+                  const Text("ODO", style: TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.bold)),
                   Text("${_data.odo.toInt()} km", style: const TextStyle(color: Color(0xFF22D3EE), fontSize: 12, fontWeight: FontWeight.bold)),
                 ],
               ),
@@ -776,7 +772,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
           length: 3,
           child: Dialog(
             backgroundColor: const Color(0xFF0F172A),
-            shape: RoundedCornerShape(16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.8,
               height: MediaQuery.of(context).size.height * 0.85,
@@ -785,7 +781,7 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                   const TabBar(
                     indicatorColor: Color(0xFF22D3EE),
                     labelColor: Color(0xFF22D3EE),
-                    unselectedLabelColor: Colors.slate400,
+                    unselectedLabelColor: Colors.white54,
                     tabs: [
                       Tab(text: "USB Serial"),
                       Tab(text: "Kontrol Manual"),
@@ -835,38 +831,49 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
                             ],
                           ),
                         ),
-
                         // Tab 2: Manual Control
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: ListView(
-                            children: [
-                              Text("Kecepatan: ${_data.speed} km/h"),
-                              Slider(
-                                value: _data.speed.toDouble(),
-                                min: 0,
-                                max: 299,
-                                onChanged: (v) => setState(() => _data = _data.copyWith(speed: v.toInt())),
+                        StatefulBuilder(
+                          builder: (context, setModalState) {
+                            return Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: ListView(
+                                children: [
+                                  Text("Kecepatan: ${_data.speed} km/h"),
+                                  Slider(
+                                    value: _data.speed.toDouble(),
+                                    min: 0,
+                                    max: 299,
+                                    onChanged: (v) {
+                                      setModalState(() {});
+                                      setState(() => _data = _data.copyWith(speed: v.toInt()));
+                                    },
+                                  ),
+                                  Text("RPM: ${_data.rpm}"),
+                                  Slider(
+                                    value: _data.rpm.toDouble(),
+                                    min: 0,
+                                    max: 12000,
+                                    onChanged: (v) {
+                                      setModalState(() {});
+                                      setState(() => _data = _data.copyWith(rpm: v.toInt()));
+                                    },
+                                  ),
+                                  Text("Gigi: ${_data.gear}"),
+                                  Slider(
+                                    value: _data.gear.toDouble(),
+                                    min: 0,
+                                    max: 6,
+                                    divisions: 6,
+                                    onChanged: (v) {
+                                      setModalState(() {});
+                                      setState(() => _data = _data.copyWith(gear: v.toInt()));
+                                    },
+                                  ),
+                                ],
                               ),
-                              Text("RPM: ${_data.rpm}"),
-                              Slider(
-                                value: _data.rpm.toDouble(),
-                                min: 0,
-                                max: 12000,
-                                onChanged: (v) => setState(() => _data = _data.copyWith(rpm: v.toInt())),
-                              ),
-                              Text("Gigi: ${_data.gear}"),
-                              Slider(
-                                value: _data.gear.toDouble(),
-                                min: 0,
-                                max: 6,
-                                divisions: 6,
-                                onChanged: (v) => setState(() => _data = _data.copyWith(gear: v.toInt())),
-                              ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
-
                         // Tab 3: ESP32 Code
                         Padding(
                           padding: const EdgeInsets.all(16),
@@ -916,13 +923,13 @@ class _DashboardScreenState extends State<DashboardScreen> with TickerProviderSt
 // -----------------------------------------------------------------------------
 class RpmGaugePainter extends CustomPainter {
   final int rpm;
+
   RpmGaugePainter({required this.rpm});
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2 + 8);
     final radius = math.min(size.width, size.height) * 0.43;
-
     const startAngle = 145.0 * (math.pi / 180.0);
     const sweepAngle = 250.0 * (math.pi / 180.0);
 
@@ -976,8 +983,9 @@ class RpmGaugePainter extends CustomPainter {
       double innerY = center.dy + math.sin(angle) * (radius - 20);
 
       bool isRedline = i >= 9;
+
       final tickPaint = Paint()
-        ..color = isRedline ? const Color(0xFFEF4444) : Colors.slate600
+        ..color = isRedline ? const Color(0xFFEF4444) : Colors.white38
         ..strokeWidth = (i % 2 == 0) ? 4 : 2;
 
       canvas.drawLine(Offset(innerX, innerY), Offset(outerX, outerY), tickPaint);
@@ -989,7 +997,7 @@ class RpmGaugePainter extends CustomPainter {
         textPainter.text = TextSpan(
           text: "$i",
           style: TextStyle(
-            color: isRedline ? const Color(0xFFEF4444) : Colors.slate400,
+            color: isRedline ? const Color(0xFFEF4444) : Colors.white70,
             fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
