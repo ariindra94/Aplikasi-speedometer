@@ -22,16 +22,13 @@ jobs:
           channel: 'stable'
 
       - name: Get dependencies
-        # Sesuaikan 'nama_folder_proyek' dengan nama folder tempat pubspec.yaml berada
-        working-directory: ./nama_folder_proyek  
         run: flutter pub get
 
       - name: Build APK
-        working-directory: ./nama_folder_proyek
         run: flutter build apk --release
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: aplikasi-speedometer-apk
-          path: nama_folder_proyek/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
